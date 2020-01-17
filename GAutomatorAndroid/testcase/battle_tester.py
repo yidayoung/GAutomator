@@ -114,11 +114,6 @@ def do_hang_on():
     """
     logger.debug("do_hang_on")
     enter_btn = engine.find_element("##next")
-    if enter_btn:
-        bound = engine.get_element_bound(enter_btn)
-        if bound:
-            device.minitoucher.click(bound.x + bound.width / 2, bound.y + bound.height / 2)
-
     engine.click(enter_btn)
     find_element_wait("#g#node_drop_fixed")
     forward_btn = engine.find_element("##btn_forward")
