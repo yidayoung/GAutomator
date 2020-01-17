@@ -684,6 +684,14 @@ class AutomatorDevice(object):
         else:
             raise AttributeError("%s attribute not found!" % attr)
 
+    def start_pop_monitor(self, handle_package, handle_text):
+        self.server.jsonmonitor.setPackagePattern(handle_package)
+        self.server.jsonmonitor.setTextPattern(handle_text)
+        self.server.jsonmonitor.setPermissionMonitor(True)
+
+    def stop_pop_monitor(self):
+        self.server.jsonmonitor.setPermissionMonitor(False)
+
     @property
     def info(self):
         '''Get the device info.

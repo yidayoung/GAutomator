@@ -102,6 +102,25 @@ def kill_process_by_name(name):
             logger.debug("kill process: {0}".format(file.readlines()))
             time.sleep(2)
 
+
+def kill_process_by_unix_socket(sock_name):
+    logger.debug("kill socket process:" + sock_name)
+    file = excute_adb("shell netstat -lxp")
+    output = file.readlines()
+    outstr = "\n".join(output)
+    # unix  2      [ ACC ]     STREAM     LISTENING       165316 25142/minitouch     @mini3
+    socket_pattern = "(\d+)/\w+.+@" + sock_name
+    match = re.search(socket_pattern, outstr, re.M)
+    if match:
+        pid = match.group(1)
+        logger.debug("found process pid= {0}".format(pid))
+        file = excute_adb("shell kill {0}".format(pid))
+        logger.debug("kill process: {0}".format(file.readlines()))
+        time.sleep(2)
+    else:
+        logger.debug("not found socket process {}".format(sock_name))
+
+
 def kill_uiautomator():
     kill_process_by_name("uiautomator")
 

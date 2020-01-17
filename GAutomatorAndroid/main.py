@@ -91,29 +91,29 @@ def _cloud_prepare():
 def _prepare():
     #clear qq,wechat and game datax on device to make sure a stable test environment, and then launch the game.
     env = os.environ.get("PLATFORM_IP")
-    logger = manager.get_logger()
-    lanuch_result = False
+    # logger = manager.get_logger()
     if env:
-        lanuch_result = _cloud_prepare()
+        _cloud_prepare()
     else:
-        lanuch_result = _native_prepare()
+        _native_prepare()
 
-    if lanuch_result:
-        #launch success. in general , a game may have a loading phase in which the sdk has not been launched. So we try to connect SDK in a loop.
-        logger.debug("Launch package {0} SUCCESS,try to connect U3DAutomation SDK".format(os.environ["PKGNAME"]))
-        global engine
-        engine = manager.get_engine()
-        version = None
-        for i in range(30):
-            try:
-                version = engine.get_sdk_version()
-                if version:
-                    logger.debug(version)
-                    manager.save_sdk_version(version)
-                    return True
-            except:
-                time.sleep(2)
-    return False
+    # if lanuch_result:
+    #     # launch success. in general , a game may have a loading phase in which the sdk has not been launched.
+    #     # So we try to connect SDK in a loop.
+    #     logger.debug("Launch package {0} SUCCESS,try to connect U3DAutomation SDK".format(os.environ["PKGNAME"]))
+    #     global engine
+    #     engine = manager.get_engine()
+    #     for i in range(30):
+    #         try:
+    #             version = engine.get_sdk_version()
+    #             if version:
+    #                 logger.debug(version)
+    #                 # manager.save_sdk_version(version)
+    #                 return True
+    #         except:
+    #             time.sleep(2)
+    return True
+
 
 def _run():
     prepare = _prepare()

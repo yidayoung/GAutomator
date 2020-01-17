@@ -118,8 +118,8 @@ def _init():
         """
             本地，初始化UiAutomator
         """
-        init_uiautomator()
-       #  init_uiautomator_with_dialoghandler()
+        # init_uiautomator()
+        init_uiautomator_with_dialoghandler()
         atexit.register(kill_uiautomator)
         return int(_uiautomator_port)
 

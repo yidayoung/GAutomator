@@ -295,7 +295,7 @@ class GameEngine(object):
         """
         x = int(x)
         y = int(y)
-        logger.debug("click ({0},{1})".format(x, y))
+        # logger.debug("click ({0},{1})".format(x, y))
         cmd = "shell input tap " + str(x) + " " + str(y)
         logger.info(cmd)
         excute_adb_process(cmd)

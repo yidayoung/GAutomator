@@ -21,11 +21,12 @@ SNAP_SHOT_MODE = '\001'
 MAX_TRIES = 3
 FORWARD_PORT = 40000
 PHONE_PORT = 25666
+SOCKET_NAME = "automator"
 PUSH_MINITOUCH = "push {0} /data/local/tmp/minitouch"
 CHMOD_MINITOUCH = "shell chmod 777 /data/local/tmp/minitouch"
-LAUNCH_MINITOUCH = "shell /data/local/tmp/minitouch"
+LAUNCH_MINITOUCH = "shell /data/local/tmp/minitouch -n " + SOCKET_NAME
 DEL_SCREENCAPTURE = "rm /data/local/tmp/minitouch"
-FORWARD = "forward tcp:{0} localabstract:minitouch".format(FORWARD_PORT)
+FORWARD = "forward tcp:{0} localabstract:{1}".format(FORWARD_PORT, SOCKET_NAME)
 REMOVE_FORWARD = "forward --remove tcp:{0}".format(FORWARD_PORT)
 
 
@@ -98,7 +99,7 @@ class Minitouch(object):
 
     def cleanup(self):
         logger.info("kill minitouch...")
-        kill_process_by_name("minitouch")
+        kill_process_by_unix_socket(SOCKET_NAME)
         self.socket.close()
         excute_adb_process(REMOVE_FORWARD)
 

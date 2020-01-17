@@ -275,6 +275,20 @@ class Device(object):
                     pid = int(pid)
                     return pid, 0
                 line = result.readline()
+
+        result = excute_adb("shell ps -ef")
+
+        if result:
+            pattern_str = r"(?P<user>\S+)\s+(?P<pid>\d+)\s+(?P<ppid>\d+)\s.*{0}\s+".format(package)
+            pattern = re.compile(pattern_str)
+            line = result.readline()
+            while line:
+                match = pattern.search(line)
+                if match:
+                    pid = match.groupdict().get("pid")
+                    pid = int(pid)
+                    return pid, 0
+                line = result.readline()
         return None
 
     def clear_data(self, package=None):
@@ -557,7 +571,7 @@ class NativeDevice(Device):
 
     def start_handle_popbox(self, handle_package_pattern=None, handle_text_pattern=None):
         if not handle_package_pattern:
-            handle_package_pattern = u"^(?!(com.tencent.mm|com.tencent.mqq|com.tencent.mobileqq|com.android.contacts|com.android.mms|com.yulong.android.contacts|com.android.dialer|com.android.keyguard|com.tencent.mm.coolassist|com.example.test.wegame.TestMainPanel|cn.uc.gamesdk.account)$).*"
+            handle_package_pattern = u"^(?!(com.special.warshiplegend.idle|com.tencent.mqq|com.tencent.mobileqq|com.android.contacts|com.android.mms|com.yulong.android.contacts|com.android.dialer|com.android.keyguard|com.tencent.mm.coolassist|com.example.test.wegame.TestMainPanel|cn.uc.gamesdk.account)$).*"
 
         if not handle_text_pattern:
             handle_text_pattern = u"(^(完成|关闭|关闭应用|好|好的|确定|确认|安装|下次再说|知道了)$|(.*(?<!不)(忽略|允(\s){0,2}许|同意)|继续|清理|稍后|暂不|强制|下一步).*)"
