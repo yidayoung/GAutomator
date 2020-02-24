@@ -33,27 +33,23 @@ import time
 import getopt
 import sys
 import optparse
-from config import Account,TestInfo
+from config import Account, TestInfo
 import wpyscripts.manager as manager
 from wpyscripts.common.wetest_exceptions import *
 
 local_package = os.environ.get("PKGNAME", TestInfo.PACKAGE)  # the package name you want to test
+
 
 def _prepare_environ():
     if os.environ.get("PLATFORM_IP", None) is None:
         """
             if the script is runned locally ,account and password should be set
         """
-        if not os.environ.get("QQNAME", None):
-            os.environ["QQNAME"] = Account.QQNAME
-            os.environ["QQPWD"] = Account.QQPWD
-
-        if not os.environ.get("WECHATNAME", None):
-            os.environ["WECHATNAME"] = Account.WECHATNAME
-            os.environ["WECHATPWD"] = Account.WECHATPWD
+        if not os.environ.get("NAME", None):
+            os.environ["NAME"] = Account.NAME
+            os.environ["PWD"] = Account.PWD
 
         env = os.environ.get("PLATFORM_IP")
-
         if not env:
             # 本地环境
             if not local_package:
@@ -61,14 +57,41 @@ def _prepare_environ():
             else:
                 os.environ["PKGNAME"] = local_package
 
+
+def wait_for_package(name):
+    """
+
+    :param name:
+    :return:
+    """
+    top_package_activity = None
+    device = manager.get_device()
+    logger = manager.get_logger()
+    for i in range(20):
+        try:
+            top_package_activity = device.get_top_package_activity()
+        except Exception as e:
+            stack = traceback.format_exc()
+            logger.error(stack)
+        if top_package_activity is None:
+            time.sleep(1)
+            continue
+        if top_package_activity.package_name == name:
+            logger.debug("Find pakcage {0}".format(top_package_activity.package_name))
+            return True
+        time.sleep(1)
+
+
 def _native_prepare():
     # clear qq/wechat/app data and launch the app
     device = manager.get_device()
-    device._clear_qq_account()
-    device._clear_user_info(local_package)
+    # device._clear_qq_account()
+    device.clear_data(local_package)
     device.launch_app(local_package)
-    time.sleep(10)
+    wait_for_package(local_package)
+    time.sleep(3)
     return True
+
 
 def _cloud_prepare():
     # test in cloud, just launch the app
@@ -88,8 +111,9 @@ def _cloud_prepare():
         logger.error("Launch app failure")
         return False
 
+
 def _prepare():
-    #clear qq,wechat and game datax on device to make sure a stable test environment, and then launch the game.
+    # clear qq,wechat and game datax on device to make sure a stable test environment, and then launch the game.
     env = os.environ.get("PLATFORM_IP")
     # logger = manager.get_logger()
     if env:
@@ -97,21 +121,6 @@ def _prepare():
     else:
         _native_prepare()
 
-    # if lanuch_result:
-    #     # launch success. in general , a game may have a loading phase in which the sdk has not been launched.
-    #     # So we try to connect SDK in a loop.
-    #     logger.debug("Launch package {0} SUCCESS,try to connect U3DAutomation SDK".format(os.environ["PKGNAME"]))
-    #     global engine
-    #     engine = manager.get_engine()
-    #     for i in range(30):
-    #         try:
-    #             version = engine.get_sdk_version()
-    #             if version:
-    #                 logger.debug(version)
-    #                 # manager.save_sdk_version(version)
-    #                 return True
-    #         except:
-    #             time.sleep(2)
     return True
 
 
@@ -135,10 +144,8 @@ def main():
     """
         when testing several phones on your local PC, you could run the py by cmd
         you only need to set one type of account. "othername and other pwd" will be used preferentially if multiple types are provided.
-        --qqname:qqaccount 
-        --qqpwd:qq password
-        --wechataccount:wechat account
-        --wechatpwd:wechat password
+        --name:account 
+        --pwd: password
         --othername:any other accounts
         --otherpwd: password of othername
         --engineport:  the forward port mapping to the sdk port in device. the parameters for each device should be individually provided.
@@ -149,10 +156,8 @@ def main():
     """
     usage = "usage:%prog [options] --qqname= --qqpwd= --engineport= --uiport= --serial="
     parser = optparse.OptionParser(usage)
-    parser.add_option("-q", "--qqname", dest="QQNAME", help="QQ Account")
-    parser.add_option("-p", "--qqpwd", dest="QQPWD", help="QQ Password")
-    parser.add_option("-b", "--wechataccount", dest="WECHATNAME", help="wechat Account")
-    parser.add_option("-c", "--wechatpwd", dest="WECHATPWD", help="wechat Password")
+    parser.add_option("-q", "--name", dest="NAME", help="Account Name")
+    parser.add_option("-p", "--pwd", dest="PWD", help="Account Password")
     parser.add_option("-e", "--engineport", dest="LOCAL_ENGINE_PORT", help="network port forward engine sdk")
     parser.add_option("-u", "--uiport", dest="UIAUTOMATOR_PORT", help="network port forward uiautomator server")
     parser.add_option("-s", "--serial", dest="ANDROID_SERIAL", help="adb devices android mobile serial")
@@ -161,9 +166,9 @@ def main():
     (options, args) = parser.parse_args()
     try:
         if options.QQNAME:
-            os.environ["QQNAME"] = options.QQNAME
+            os.environ["NAME"] = options.NAME
         if options.QQPWD:
-            os.environ["QQPWD"] = options.QQPWD
+            os.environ["PWD"] = options.PWD
         if options.LOCAL_ENGINE_PORT:
             os.environ["LOCAL_ENGINE_PORT"] = options.LOCAL_ENGINE_PORT
         if options.UIAUTOMATOR_PORT:
@@ -174,10 +179,6 @@ def main():
             os.environ["OTHERNAME"] = options.OTHERNAME
         if options.OTHERPWD:
             os.environ["OTHERPWD"] = options.OTHERPWD
-        if options.WECHATNAME:
-            os.environ["WECHATNAME"] = options.WECHATNAME
-        if options.WECHATPWD:
-            os.environ["WECHATPWD"] = options.WECHATPWD
 
         _prepare_environ()
     except getopt.error as msg:

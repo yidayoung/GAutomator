@@ -32,16 +32,15 @@ def run():
     """
     try:
         nowStr = str(int(time.time()))
-        from . import login_tester
+        import login_tester
         login_tester.main(nowStr, 2)
         time.sleep(5)
-        from . import create_role_tester
+        import create_role_tester
         create_role_tester.create_role(nowStr)
-        from . import tutorials_test
+        import tutorials_test
         tutorials_test.main()
-        from . import battle_tester
+        import battle_tester
         battle_tester.main()
-        pass
     except Exception as e:
         traceback.print_exc()
         stack = traceback.format_exc()

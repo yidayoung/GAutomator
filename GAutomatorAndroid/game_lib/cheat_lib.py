@@ -2,9 +2,9 @@
 """
 作弊必须在主界面进行，作弊截止动作为作弊输入窗口再次点开
 """
-
-from testcase.tools import *
-from testcase.game_lib import sence_lib
+from basic_operator import engine
+from game_lib import sence_lib
+import time
 
 
 def cheat_cmd(cmd):

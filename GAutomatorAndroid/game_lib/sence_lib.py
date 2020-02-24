@@ -2,23 +2,10 @@
 """
 负责场景切换
 """
-from testcase.tools import *
-
-
-def find_then_click(btn):
-    btn = engine.find_element(btn)
-    if btn:
-        engine.click(btn)
-        return True
-    return False
-
-
-def find_btns(exit_btns):
-    for btn_name in exit_btns:
-        btn = engine.find_element(btn_name)
-        if btn:
-            return btn
-    return None
+from ui_lib import find_then_click, find_btn_in_list
+from basic_operator import engine
+from basic_operator import logger
+import time
 
 
 def enter_main():
@@ -40,10 +27,10 @@ def enter_main():
         time_lable = engine.find_element("##text_time")
     # 退出到主界面后可能会出现一些弹窗啥的，保险起见再做一次清理
 
-    exit_btn = find_btns(exit_btns)
+    exit_btn = find_btn_in_list(exit_btns)
     while exit_btn:
         engine.click(exit_btn)
-        exit_btn = find_btns(exit_btns)
+        exit_btn = find_btn_in_list(exit_btns)
     logger.debug("切到主界面完成")
 
 
@@ -63,7 +50,7 @@ def enter_ship_main():
 
 def clear_blank_close():
     while True:
-        if find_btns(["##btnBlankClose"]):
+        if find_btn_in_list(["##btnBlankClose"]):
             engine.click_position(5, 5)
         else:
             return
@@ -73,6 +60,19 @@ def clear_ads():
     while True:
         if not find_then_click("##btnClose"):
             return
+
+
+def enter_mail():
+    enter_main()
+    mail_btn = engine.find_element(
+        "/UI Root/window_major_haven/##node_ui/GameObject_flexible/##flex_btn_obj/##func_obj_mail/obj_main_btn/Image"
+        "/##btn_func")
+    if not mail_btn:
+        find_then_click("##btn_show")
+        mail_btn = engine.find_element(
+            "/UI Root/window_major_haven/##node_ui/GameObject_flexible/##flex_btn_obj/##func_obj_mail/obj_main_btn"
+            "/Image/##btn_func")
+    engine.click(mail_btn)
 
 
 if __name__ == '__main__':
